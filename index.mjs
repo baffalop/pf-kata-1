@@ -27,6 +27,7 @@ const knowledge = {
 }
 
 let goes = 0
+const guesses = []
 
 for (const i of Array(20)) {
   console.log('Knowledge', knowledge)
@@ -36,16 +37,17 @@ for (const i of Array(20)) {
 
   if (candidates.length === 0) {
     console.log(`No words left 😶 after ${goes} goes`)
+    console.log('Guesses', guesses)
     break
   }
 
-  const randomCandidate = randomWord(candidates)
-  console.log(`Random candidate ${randomCandidate}`)
-
-  const response = await guess(randomCandidate)
+  const guess = randomWord(candidates)
+  guesses.push(guess)
+  const response = await makeGuess(guess)
   goes = response.goes
 
   if (response.solved) {
+    console.log('Guesses', guesses)
     console.log(`Solved in ${goes} 🎉`)
     break
   }
@@ -53,7 +55,7 @@ for (const i of Array(20)) {
   updateKnowledge(response.evaluation)
 }
 
-async function guess (word) {
+async function makeGuess (word) {
   console.log(`Guessing ${word}`)
   const url = `${baseUrl}/play/${gameId}/guess/${word}`
   console.log('Request', url)
