@@ -18,44 +18,48 @@ cli
 
 cli.parse()
 
-const gameId = await createGame()
+for (const gameI of Array(50)) {
+  console.log(`Game ${gameI}`)
 
-const knowledge = {
-  perfect: Array(5).fill(null),
-  partial: new Set(),
-  eliminated: new Set(),
-}
+  const gameId = await createGame()
 
-let goes = 0
-const guesses = []
+  let goes = 0
+  const guesses = []
 
-for (const i of Array(20)) {
-  console.log('Knowledge', knowledge)
-
-  const candidates = getCandidates(knowledge)
-  console.log('Candidates', candidates)
-
-  if (candidates.length === 0) {
-    console.log(`No words left 😶 after ${goes} goes`)
-    console.log('Guesses', guesses)
-    break
+  const knowledge = {
+    perfect: Array(5).fill(null),
+    partial: new Set(),
+    eliminated: new Set(),
   }
 
-  const guess = randomWord(candidates)
-  guesses.push(guess)
-  const response = await makeGuess(guess)
-  goes = response.goes
+  for (const i of Array(20)) {
+    console.log('Knowledge', knowledge)
 
-  if (response.solved) {
-    console.log('Guesses', guesses)
-    console.log(`Solved in ${goes} 🎉`)
-    break
+    const candidates = getCandidates(knowledge)
+    console.log('Candidates', candidates)
+
+    if (candidates.length === 0) {
+      console.log(`No words left 😶 after ${goes} goes`)
+      console.log('Guesses', guesses)
+      break
+    }
+
+    const guess = randomWord(candidates)
+    guesses.push(guess)
+    const response = await makeGuess(gameId, guess)
+    goes = response.goes
+
+    if (response.solved) {
+      console.log('Guesses', guesses)
+      console.log(`Solved in ${goes} 🎉`)
+      break
+    }
+
+    updateKnowledge(knowledge, response.evaluation)
   }
-
-  updateKnowledge(response.evaluation)
 }
 
-async function makeGuess (word) {
+async function makeGuess (gameId, word) {
   console.log(`Guessing ${word}`)
   const url = `${baseUrl}/play/${gameId}/guess/${word}`
   console.log('Request', url)
@@ -88,7 +92,7 @@ function getCandidates ({ perfect, partial, eliminated }) {
   })
 }
 
-function updateKnowledge (evaluation) {
+function updateKnowledge (knowledge, evaluation) {
   matchTypes(evaluation, 'Perfect').forEach(({ index, character }) => {
     knowledge.perfect[index] = character
   })
@@ -113,16 +117,17 @@ function matchTypes (evaluation, type) {
 function scoreBestWord () {
 }
 
-function getFrequencies (candidateWords) {
+function getFrequency (candidateWords) {
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz'
   const frequencyHash = {}
+
+  alphabet.split('').forEach((letter) => {
+    frequencyHash[letter] = 0
+  })
 
   candidateWords.forEach((word) => {
     word.forEach((letter) => {
-      if (letter in frequencyHash) {
-        frequencyHash[letter] = 1
-      } else {
-        frequencyHash[letter] += 1
-      }
+      frequencyHash[letter] += 1
     })
   })
 
