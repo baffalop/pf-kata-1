@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.mjs",
   "scripts": {
-    "go": "ts-node index.ts"
+    "go": "node index.mjs"
   },
+  "type": "module",
   "author": "Easter Code",
   "license": "ISC",
   "dependencies": {
