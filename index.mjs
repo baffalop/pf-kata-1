@@ -2,7 +2,7 @@ import { program as cli } from 'commander'
 import fs from 'node:fs'
 
 const baseUrl = 'http://sweepstake.services:85'
-const teamName = 'cornelius-beer-and-wine'
+const teamName = 'cornelius-beer'
 
 const words = fs.readFileSync('./words.txt', 'utf-8')
   .split('\r\n')
@@ -62,7 +62,6 @@ for (const gameI of Array(50)) {
 async function makeGuess (gameId, word) {
   console.log(`Guessing ${word}`)
   const url = `${baseUrl}/play/${gameId}/guess/${word}`
-  console.log('Request', url)
   const response = await fetch(url)
   return await response.json()
 }
