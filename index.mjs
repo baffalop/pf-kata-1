@@ -93,12 +93,16 @@ function updateKnowledge (evaluation) {
     knowledge.perfect[index] = character
   })
 
-  matchTypes(evaluation, 'None').forEach(({ character }) => {
-    knowledge.eliminated.add(character)
-  })
-
   matchTypes(evaluation, 'Partial').forEach(({ character }) => {
     knowledge.partial.add(character)
+  })
+
+  matchTypes(evaluation, 'None').forEach(({ character }) => {
+    if (knowledge.partial.has(character) || knowledge.perfect.includes(character)) {
+      return
+    }
+
+    knowledge.eliminated.add(character)
   })
 }
 
