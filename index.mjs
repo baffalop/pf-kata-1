@@ -2,7 +2,7 @@ import { program as cli } from 'commander'
 import fs from 'node:fs'
 
 const baseUrl = 'http://sweepstake.services:85'
-const teamName = 'cornelius-beer'
+const teamName = 'cornelius-wine'
 
 const words = fs.readFileSync('./words.txt', 'utf-8')
   .split('\r\n')
@@ -18,7 +18,7 @@ cli
 
 cli.parse()
 
-for (const gameI of Array(50)) {
+for (const gameI of Array(1)) {
   console.log(`Game ${gameI}`)
 
   const gameId = await createGame()
@@ -44,7 +44,11 @@ for (const gameI of Array(50)) {
       break
     }
 
-    const guess = randomWord(candidates)
+    const bestWord = selectBestWord(candidates)
+    console.log('Best word', bestWord)
+
+    const guess = bestWord.word
+
     guesses.push(guess)
     const response = await makeGuess(gameId, guess)
     goes = response.goes
@@ -113,7 +117,14 @@ function matchTypes (evaluation, type) {
   return evaluation.filter(({ match_type }) => match_type === type)
 }
 
-function scoreBestWord () {
+function selectBestWord (candidates) {
+  const frequencies = getFrequency(candidates)
+
+  return candidates.reduce((best, word) => {
+    const score = word.split('').map(c => frequencies[c]).reduce((prev, next) => prev + next)
+
+    return best.score < score ? { word, score } : best
+  }, { word: null, score: 0 })
 }
 
 function getFrequency (candidateWords) {
@@ -125,7 +136,7 @@ function getFrequency (candidateWords) {
   })
 
   candidateWords.forEach((word) => {
-    word.forEach((letter) => {
+    word.split('').forEach((letter) => {
       frequencyHash[letter] += 1
     })
   })
